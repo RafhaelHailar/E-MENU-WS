@@ -8,7 +8,7 @@ function asyncHandler(fn: Function) {
             
             return data;
         } catch (error) {
-            return { error };
+            return { status: 500, error };
         }
     }    
 }
