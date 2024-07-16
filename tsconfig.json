@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ESNext",
+    "sourceMap": true,
+    "outDir": "build",
+    "esModuleInterop": true,
+    "baseUrl": "."
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules"]
+}
