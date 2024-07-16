@@ -4,6 +4,7 @@ import redis from "../lib/redis";
 import io from "../lib/socket.io";
 import getOrCacheTableStatus from "../utils/getOrCacheTableStatus";
 import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
+import getMyStatus from "../api/getMyStatus";
 
 
 export default async function(socket: Socket) {
@@ -11,9 +12,11 @@ export default async function(socket: Socket) {
 
     socket.on("add cart", async (data) => {
         const productId = data.productId;
-        const tableStatus = JSON.parse(await getOrCacheTableStatus(tableSession));
+        const tableStatus = await getMyStatus(tableSession);
 
+        console.log(productId, tableStatus);
         if (tableStatus.status !== 200) return socket.emit("erro cart action", tableStatus);
+
 
         const key = `${tableSession}-cart:${productId}`;
 
@@ -35,7 +38,7 @@ export default async function(socket: Socket) {
 
     socket.on("sub cart", async (data) => {
         const productId = data.productId;
-        const tableStatus = JSON.parse(await getOrCacheTableStatus(tableSession));
+        const tableStatus = await getMyStatus(tableSession);
 
         if (tableStatus.status !== 200) return socket.emit("error cart action", tableStatus);
 
