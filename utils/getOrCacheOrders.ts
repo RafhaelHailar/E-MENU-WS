@@ -1,18 +1,15 @@
-import redis from "../lib/redis";
+import { redisGet, redisSet } from "../lib/redis";
 import getOrders from "../api/getOrders";
 
 async function getOrCacheOrders(userSession: string) {
-    try {
-        const orders = await redis.get("orders");
-        if (orders != null) return orders;
-        else {
-            const ordersData = await getOrders(userSession);
-            redis.set("orders",JSON.stringify(ordersData));
-            return ordersData;
-        }
-    } catch (e) {
-        console.error(e);
-    }
+    const key = "orders";
+
+    const orders = await redisGet(key);
+    if (orders.error || orders.data != null) return orders;
+    
+    const ordersData = await getOrders(userSession);
+    redisSet(key, ordersData);
+    return { data: ordersData };
 }
 
 export default getOrCacheOrders;

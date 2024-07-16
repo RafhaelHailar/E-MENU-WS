@@ -12,7 +12,9 @@ async function init() {
 
     const session = await login(process.env.API_SERVER_LOGIN_USERNAME,process.env.API_SERVER_LOGIN_PASSWORD);
 
-    await getOrCacheOrders(session.sessionId);
+    if (session.error) throw new Error("error logging in: " + session.error);
+
+    await getOrCacheOrders(session.data.sessionId);
 }
 
 init().then(async () => {
@@ -25,7 +27,3 @@ init().then(async () => {
         process.exit(1);
     }
 });
-
-async function shutdown() {
-   
-}

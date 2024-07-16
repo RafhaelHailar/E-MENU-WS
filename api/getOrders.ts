@@ -1,3 +1,4 @@
+import asyncHandler from "../utils/asyncHandler";
 
 async function getOrders(userSession: string) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/orders`, {
@@ -7,9 +8,7 @@ async function getOrders(userSession: string) {
         },
     });
 
-    const order = await request.json();
-
-    return order;
+    return request;
 }
 
-export default getOrders;
+export default asyncHandler(getOrders);

@@ -1,3 +1,4 @@
+import asyncHandler from "../utils/asyncHandler";
 
 async function getMyStatus(tableSession: string) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/my_status`, {
@@ -7,9 +8,7 @@ async function getMyStatus(tableSession: string) {
         },
     });
 
-    const data = await request.json();
-
-    return {status: request.status,data};
+    return request;
 }
 
-export default getMyStatus;
+export default asyncHandler(getMyStatus);

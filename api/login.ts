@@ -1,4 +1,6 @@
-async function login(email,password) {
+import asyncHandler from "../utils/asyncHandler";
+
+async function login(email: string,password: string) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
@@ -7,7 +9,7 @@ async function login(email,password) {
         body: JSON.stringify({email,password})
     });
 
-    return await request.json();
+    return request;
 }
 
-export default login;
+export default asyncHandler(login);
