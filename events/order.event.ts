@@ -3,6 +3,7 @@ import getOrCacheOrders from "../utils/getOrCacheOrders";
 import getMyLatestOrder from "../api/getMyLatestOrder";
 import redis from "../lib/redis";
 import io from "../lib/socket.io";
+import updateOrderStatus from "../api/updateOrderStatus";
 
 
 export default function(socket: Socket) {
@@ -23,13 +24,15 @@ export default function(socket: Socket) {
 
         const customerSocketId = await redis.get(`table-session-${order.sessionId}`);
 
-        if (!customerSocketId) return;
+        if (customerSocketId) {
+            const customerSocket = io.sockets.sockets.get(customerSocketId);
+            console.log(order);
+            console.log("sending update....");
+            customerSocket.emit("latest order update", {status: 200, data: order});
+        }
         
-        const customerSocket = io.sockets.sockets.get(customerSocketId);
-        console.log(order);
-        console.log("sending update....");
-        customerSocket.emit("latest order update", {status: 200, data: order});
         io.emit("orders sent", orders);
+        await updateOrderStatus(userSession, data.orderNo, data.status);
     });
 
     socket.on("my latest order status", async () => {
