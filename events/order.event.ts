@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import getOrCacheOrders from "../utils/getOrCacheOrders";
 import getMyLatestOrder from "../api/getMyLatestOrder";
-import redis from "../lib/redis";
+import { redisGet, redisSet } from "../lib/redis";
 import io from "../lib/socket.io";
 import updateOrderStatus from "../api/updateOrderStatus";
 import getMyStatus from "../api/getMyStatus";
@@ -12,27 +12,28 @@ export default function(socket: Socket) {
 
     socket.on("get orders", async () => {
         const orders = await getOrCacheOrders(userSession);
-       // console.log(orders);
-        socket.emit("orders sent", JSON.parse(orders));
+        socket.emit("orders sent", orders);
     });
 
     socket.on("update order status", async (data) => {
-        const orders = JSON.parse(await getOrCacheOrders(userSession));
-        const order = orders.find(order => order.orderNo === data.orderNo);
-        const orderIdx = orders.indexOf(order);
+        const orders = (await getOrCacheOrders(userSession));
+
+        if (orders.error) return socket.emit("error", orders);
+
+        const order = orders.data.find(order => order.orderNo === data.orderNo);
+        const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
         orders[orderIdx] = order;
 
-        const customerSocketId = await redis.get(`table-session-${order.sessionId}`);
+        const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
 
-        if (customerSocketId) {
-            const customerSocket = io.sockets.sockets.get(customerSocketId);
-            console.log(order);
+        if (!customerSocketId.error) {
+            const customerSocket = io.sockets.sockets.get(customerSocketId.data);
             console.log("sending update....");
             customerSocket.emit("latest order update", {status: 200, data: order});
         }
         
-        redis.set("orders", JSON.stringify(orders));
+        redisSet("orders", orders);
         io.emit("orders sent", orders);
         await updateOrderStatus(userSession, data.orderNo, data.status);
     });
@@ -43,10 +44,14 @@ export default function(socket: Socket) {
         if (tableStatus.status !== 200) return socket.emit("error", tableStatus);
 
         const order = await getMyLatestOrder(tableSession);
-        if (order.error) socket.emit("error", order.error);
+        if (order.error) return socket.emit("error", order.error);
         
-        const response = order.status === 200 ? order.data : [];
+        const response = order.data || [];
 
         socket.emit("latest order update", {status: order.status, data: response})
+    });
+
+    socket.on("order cart item", () => {
+
     });
 };
