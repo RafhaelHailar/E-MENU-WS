@@ -7,13 +7,13 @@ import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
 
 
 export default async function(socket: Socket) {
-    const { userSession, tableSession } = socket.handshake.query as  { userSession: string, tableSession: string }; 
+    const { tableSession } = socket.handshake.query as  { tableSession: string }; 
 
     socket.on("add cart", async (data) => {
         const productId = data.productId;
         const tableStatus = JSON.parse(await getOrCacheTableStatus(tableSession));
 
-        if (tableStatus.status !== 200) return socket.emit("error add cart", tableStatus);
+        if (tableStatus.status !== 200) return socket.emit("erro cart action", tableStatus);
 
         const key = `${tableSession}-cart:${productId}`;
 
@@ -27,6 +27,29 @@ export default async function(socket: Socket) {
             }
 
             await sendCartItemsUpdate(socket, tableSession);
+        } catch (e) {
+            console.log(e);
+        }
+        
+    });
+
+    socket.on("sub cart", async (data) => {
+        const productId = data.productId;
+        const tableStatus = JSON.parse(await getOrCacheTableStatus(tableSession));
+
+        if (tableStatus.status !== 200) return socket.emit("error cart action", tableStatus);
+
+        const key = `${tableSession}-cart:${productId}`;
+
+        try {
+            const cartItemQuantity = await redis.get(key);
+            
+            if (cartItemQuantity !== null && cartItemQuantity !== undefined) {
+                const newQuantity = Number(cartItemQuantity) - 1;
+                if (newQuantity <= 0) await redis.del(key);
+                else await redis.set(key, newQuantity);
+                await sendCartItemsUpdate(socket, tableSession);
+            }
         } catch (e) {
             console.log(e);
         }
