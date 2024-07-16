@@ -4,8 +4,7 @@ import getMyLatestOrder from "../api/getMyLatestOrder";
 import redis from "../lib/redis";
 import io from "../lib/socket.io";
 import updateOrderStatus from "../api/updateOrderStatus";
-import getOrCacheTableStatus from "../utils/getOrCacheTableStatus";
-import getMyStatus from "api/getMyStatus";
+import getMyStatus from "../api/getMyStatus";
 
 
 export default function(socket: Socket) {
