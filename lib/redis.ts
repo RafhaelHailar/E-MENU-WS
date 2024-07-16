@@ -4,22 +4,28 @@ const redis = new Redis(`rediss://default:${process.env.REDIS_DB_PASSWORD}@${pro
 
 export default redis;
 
-export async function redisGet(key: string) {
-    try {
-        const data = await redis.get(key);
-
-        return { data: JSON.parse(data) };
-    } catch (error) {
-        return { error };
+function requestHandler(fn: Function) {
+    return async function(...params: any[]) {
+        try {
+            const data = await fn(...params);
+            return data;
+        } catch (error) {
+            return { error };
+        }
     }
 }
 
-export async function redisSet(key: string, value: any) {
-    try {
-        const data = await redis.set(key, JSON.stringify(value));
+export const redisGet = requestHandler(async function (key: string) {
+    const data = await redis.get(key);
+    return { data: JSON.parse(data) };
+});
 
-        return { data: JSON.parse(data) };
-    } catch (error) {
-        return { error };
-    }
-}
+export const redisSet = requestHandler(async function(key: string, value: any) {
+    const data = await redis.set(key, JSON.stringify(value));
+    return { data: JSON.parse(data) };
+});
+
+export const redisDel = requestHandler(async function(key: string) {
+    await redis.del(key);
+    return {data: 1};
+});
