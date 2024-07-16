@@ -7,7 +7,6 @@ async function getOrCacheOrders(userSession: string) {
         if (orders != null) return orders;
         else {
             const ordersData = await getOrders(userSession);
-            console.log(ordersData)
             redis.set("orders",JSON.stringify(ordersData));
             return ordersData;
         }
