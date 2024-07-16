@@ -22,7 +22,7 @@ export default async function(socket: Socket) {
         if (!cartItemQuantity.data) 
             await redisSet(key, 1);
         else 
-            await redisSet(key, Number(cartItemQuantity) + 1);
+            await redisSet(key, Number(cartItemQuantity.data) + 1);
         
         await sendCartItemsUpdate(socket, tableSession);
     });

@@ -11,8 +11,8 @@ async function sendCartItemsUpdate(socket: Socket, tableSession: string) {
         for (let i = 0;i < cartItemsKey.length;i++) {
             const key = cartItemsKey[i];
             const id = key.split(prefix)[1];
-            const value = Number(await redisGet(key));
-            cartItems.push({id, quantity: value});
+            const value = await redisGet(key);
+            cartItems.push({id, quantity: Number(value.data)});
         }
         
         socket.emit("cart update", {data: cartItems});
