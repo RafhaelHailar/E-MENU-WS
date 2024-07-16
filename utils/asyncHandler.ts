@@ -1,9 +1,11 @@
-
+import transformResponse from "./transformResponse";
 
 function asyncHandler(fn: Function) {
     return async function (...params: any[]) {
         try {
-            const data = await fn(...params);
+            const response = await fn(...params);
+            const data = await transformResponse(response);
+            
             return data;
         } catch (error) {
             return { error };
