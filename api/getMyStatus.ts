@@ -7,9 +7,9 @@ async function getMyStatus(tableSession: string) {
         },
     });
 
-    const status = await request.json();
+    const data = await request.json();
 
-    return status;
+    return {status: request.status,data};
 }
 
 export default getMyStatus;
