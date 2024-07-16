@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon app.ts"
+    "dev": "nodemon app.ts",
+    "build": "rm -rf build && tsc --build tsconfig.build.json && node ./build/app.js"
   },
   "keywords": [],
   "author": "",
