@@ -1,4 +1,4 @@
-import redis from "../lib/redis";
+import { redisGet } from "../lib/redis";
 import { Socket } from "socket.io";
 import getKeysWithPrefix from "./getKeysWithPrefix";
 
@@ -11,13 +11,14 @@ async function sendCartItemsUpdate(socket: Socket, tableSession: string) {
         for (let i = 0;i < cartItemsKey.length;i++) {
             const key = cartItemsKey[i];
             const id = key.split(prefix)[1];
-            const value = Number(await redis.get(key));
+            const value = Number(await redisGet(key));
             cartItems.push({id, quantity: value});
         }
         
         socket.emit("cart update", {data: cartItems});
-    } catch (e) {
-        console.log(e);
+    } catch (error) {
+        console.log(error);
+        socket.emit("error", { error })
     }
 }
 
