@@ -4,7 +4,15 @@ import redis from "./redis";
 import connectionEvent from "../events/connection.event";
 import orderEvent from "../events/order.event";
 
-export default function(io: Server) {
+const io = new Server({
+    cors: {
+       origin: 'http://localhost:3000'
+    }
+});
+
+export default io;
+
+export function getSocket() {
     
     io.on("connection", socket => {
         console.log("user connected: ", socket.id);
