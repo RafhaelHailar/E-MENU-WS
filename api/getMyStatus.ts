@@ -1,3 +1,4 @@
+import transformResponse from "../utils/transformResponse";
 
 async function getMyStatus(tableSession: string) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/my_status`, {
@@ -7,9 +8,8 @@ async function getMyStatus(tableSession: string) {
         },
     });
 
-    const data = await request.json();
-
-    return {status: request.status,data};
+    const response = await transformResponse(request);
+    return response;
 }
 
 export default getMyStatus;
