@@ -3,6 +3,7 @@ import redis from "./redis";
 
 import connectionEvent from "../events/connection.event";
 import orderEvent from "../events/order.event";
+import cartEvent from "../events/cart.event";
 
 const io = new Server({
     cors: {
@@ -25,5 +26,6 @@ export function getSocket() {
 
         connectionEvent(socket);
         orderEvent(socket);
+        cartEvent(socket);
     });
 }

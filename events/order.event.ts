@@ -31,6 +31,7 @@ export default function(socket: Socket) {
             customerSocket.emit("latest order update", {status: 200, data: order});
         }
         
+        redis.set("orders", JSON.stringify(orders));
         io.emit("orders sent", orders);
         await updateOrderStatus(userSession, data.orderNo, data.status);
     });
