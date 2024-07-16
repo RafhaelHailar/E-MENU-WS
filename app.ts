@@ -1,20 +1,14 @@
 import "dotenv/config";
-import { Server, } from "socket.io";
+
 import getOrCacheOrders from "./utils/getOrCacheOrders";
 import login from "./api/login";
 import redis from "./lib/redis";
-import socketIo from "./lib/socket.io";
+import io, { getSocket }  from "./lib/socket.io";
 import("node-fetch");
-
-const io = new Server({
-    cors: {
-       origin: 'http://localhost:3000'
-    }
-});
 
 async function init() {
     // init socket io events
-    socketIo(io);
+    getSocket();
 
     const session = await login(process.env.API_SERVER_LOGIN_USERNAME,process.env.API_SERVER_LOGIN_PASSWORD);
 
@@ -31,7 +25,7 @@ async function shutdown() {
     redis.disconnect(true);
     process.exit(0);
 }
-
+/* 
 process.on("exit", async () => {
     console.log("redis server cleared");
 });
@@ -44,4 +38,4 @@ process.on('SIGINT', async () => {
 process.on('SIGTERM', async () => {
     console.log('Received SIGTERM signal');
     await shutdown();
-});
+}); */
