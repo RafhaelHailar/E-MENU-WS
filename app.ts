@@ -15,27 +15,17 @@ async function init() {
     await getOrCacheOrders(session.sessionId);
 }
 
-init().then(() => {
-    io.listen(Number(process.env.PORT));
-    console.log(`Listening on: ${process.env.WS_BASE_URL}`);
+init().then(async () => {
+    try {
+        io.listen(Number(process.env.PORT));
+        console.log(`Listening on: ${process.env.WS_BASE_URL}`);
+    } catch (e) {
+        await redis.flushall();
+        redis.disconnect(true);
+        process.exit(1);
+    }
 });
 
 async function shutdown() {
-    await redis.flushall();
-    redis.disconnect(true);
-    process.exit(0);
+   
 }
-/* 
-process.on("exit", async () => {
-    console.log("redis server cleared");
-});
-
-process.on('SIGINT', async () => {
-    console.log('Received SIGINT signal');
-    await shutdown();
-});
-  
-process.on('SIGTERM', async () => {
-    console.log('Received SIGTERM signal');
-    await shutdown();
-}); */

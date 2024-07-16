@@ -4,6 +4,7 @@ import getMyLatestOrder from "../api/getMyLatestOrder";
 import redis from "../lib/redis";
 import io from "../lib/socket.io";
 import updateOrderStatus from "../api/updateOrderStatus";
+import getMyStatus from "../api/getMyStatus";
 
 
 export default function(socket: Socket) {
@@ -37,6 +38,10 @@ export default function(socket: Socket) {
     });
 
     socket.on("my latest order status", async () => {
+        const tableStatus = await getMyStatus(tableSession);
+
+        if (tableStatus.status !== 200) return socket.emit("error", tableStatus);
+
         const order = await getMyLatestOrder(tableSession);
         if (order.error) socket.emit("error", order.error);
         
