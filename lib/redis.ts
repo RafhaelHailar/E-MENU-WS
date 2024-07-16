@@ -13,3 +13,13 @@ export async function redisGet(key: string) {
         return { error };
     }
 }
+
+export async function redisSet(key: string, value: any) {
+    try {
+        const data = await redis.set(key, JSON.stringify(value));
+
+        return { data: JSON.parse(data) };
+    } catch (error) {
+        return { error };
+    }
+}
