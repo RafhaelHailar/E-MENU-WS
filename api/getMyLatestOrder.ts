@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler";
 
-async function getMyLatestOrder(tableSession) {
+async function getMyLatestOrder(tableSession: string) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/my_latest_order`, {
         credentials: "include",
         headers: {
