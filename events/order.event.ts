@@ -33,7 +33,7 @@ export default async function(socket: Socket) {
         orders.data[orderIdx] = order;
 
         const inventory = (await getOrCacheInventory(userSession)).data;
-        if (!orders.error) {
+        if (status === "SERVE") {
             for (let i = 0;i < order.orders.length;i++) {
                 const current = order.orders[i];
                 const productId = current.product.id;
