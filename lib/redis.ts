@@ -1,6 +1,7 @@
-import { Redis } from "ioredis";
+import Redis from "ioredis";
 
-const redis = new Redis(`rediss://default:${process.env.REDIS_DB_PASSWORD}@${process.env.REDIS_DB_HOST}:${process.env.REDIS_DB_PORT}`);
+// const redis = new Redis(`rediss://default:${process.env.REDIS_DB_PASSWORD}@${process.env.REDIS_DB_HOST}:${process.env.REDIS_DB_PORT}`);
+const redis = Redis.createClient();
 
 export default redis;
 
@@ -17,6 +18,9 @@ function requestHandler(fn: Function) {
 
 export const redisGet = requestHandler(async function (key: string) {
     const data = await redis.get(key);
+
+    if (data === "") return { data: null };
+    
     return { data: JSON.parse(data) };
 });
 
