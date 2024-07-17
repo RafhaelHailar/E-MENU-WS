@@ -22,8 +22,28 @@ init().then(async () => {
         io.listen(Number(process.env.PORT));
         console.log(`Listening on: ${process.env.WS_BASE_URL}`);
     } catch (e) {
-        await redis.flushall();
-        redis.disconnect(true);
-        process.exit(1);
+        await shutdown();
     }
+});
+
+async function shutdown() {
+    await redis.flushall();
+    console.log("redis db cleared");
+    redis.disconnect(true);
+    process.exit(1);
+}
+
+process.on("exit", async() => {
+    await shutdown();
+    console.log("app exited");
+});
+
+process.on('uncaughtException', async (e) => {
+    await shutdown();
+    console.log(`Uncaught Exception: ${e}`);
+});
+
+process.on('unhandledRejection', async (e) => {
+    await shutdown();
+    console.log(`Unhandled Rejection: ${e}`);
 });

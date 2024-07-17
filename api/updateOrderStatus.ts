@@ -1,6 +1,6 @@
 import asyncHandler from "../utils/asyncHandler";
 
-async function updateOrderStatus(userSession, orderNo, status) {
+async function updateOrderStatus(userSession: string, orderNo: number, status) {
     const request = await fetch(`${process.env.API_SERVER_BASE_URL}/order/status`, {
         method: "POST",
         credentials: "include",
