@@ -2,8 +2,10 @@ import "dotenv/config";
 
 import getOrCacheOrders from "./utils/getOrCacheOrders";
 import login from "./api/login";
-import redis from "./lib/redis";
+import redis, { redisSet } from "./lib/redis";
 import io, { getSocket }  from "./lib/socket.io";
+import getOrCacheInventory from "./utils/getOrCacheInventor";
+
 import("node-fetch");
 
 async function init() {
@@ -14,7 +16,11 @@ async function init() {
 
     if (session.error) throw new Error("error logging in: " + session.error);
 
-    await getOrCacheOrders(session.data.sessionId);
+    const sessionId = session.data.sessionId;
+    await getOrCacheOrders(sessionId);
+    await getOrCacheInventory(sessionId);
+
+    redisSet("_user_session", sessionId);
 }
 
 init().then(async () => {
@@ -34,16 +40,16 @@ async function shutdown() {
 }
 
 process.on("exit", async() => {
-    await shutdown();
     console.log("app exited");
+    await shutdown();
 });
 
 process.on('uncaughtException', async (e) => {
-    await shutdown();
     console.log(`Uncaught Exception: ${e}`);
+    await shutdown();
 });
 
 process.on('unhandledRejection', async (e) => {
-    await shutdown();
     console.log(`Unhandled Rejection: ${e}`);
+    await shutdown();
 });

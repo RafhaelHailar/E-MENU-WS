@@ -18,7 +18,7 @@ async function sendCartItemsUpdate(socket: Socket, tableSession: string) {
         socket.emit("cart update", {data: cartItems});
     } catch (error) {
         console.log(error);
-        socket.emit("error", { error })
+        socket.emit("non displayable error", { error })
     }
 }
 

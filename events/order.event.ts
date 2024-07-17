@@ -12,33 +12,34 @@ import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
 import updateLatestOrder from "../utils/updateLatestOrder";
 
 
-export default function(socket: Socket) {
+export default async function(socket: Socket) {
     const { userSession, tableSession } = socket.handshake.query as  { userSession: string, tableSession: string }; 
 
     socket.on("get orders", async () => {
         const orders = await getOrCacheOrders(userSession);
-        socket.emit("orders sent", orders);
+
+        if (!orders.error)
+            socket.emit("orders sent", orders);
     });
 
     socket.on("update order status", async (data) => {
         const orders = (await getOrCacheOrders(userSession));
-
         if (orders.error) return socket.emit("error", orders);
-
+        
         const order = orders.data.find(order => order.orderNo === data.orderNo);
         const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
-        orders[orderIdx] = order;
-
+        orders.data[orderIdx] = order;
+        
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
-
-        if (!customerSocketId.error) {
+        
+        if (!customerSocketId.error && customerSocketId.data) {
             const customerSocket = io.sockets.sockets.get(customerSocketId.data);
             console.log("sending update....");
             customerSocket.emit("latest order update", {status: 200, data: order});
         }
-        
-        redisSet("orders", orders);
+   
+        redisSet("orders", orders.data);
         io.emit("orders sent", orders);
         await updateOrderStatus(userSession, data.orderNo, data.status);
     });
@@ -46,7 +47,7 @@ export default function(socket: Socket) {
     socket.on("my latest order status", async () => {
         const tableStatus = await getMyStatus(tableSession);
 
-        if (tableStatus.status !== 200) return socket.emit("error", tableStatus);
+        if (tableStatus.status !== 200) return socket.emit("non displayable error", tableStatus);
 
         await updateLatestOrder(socket, tableSession);
     });
@@ -58,6 +59,14 @@ export default function(socket: Socket) {
        
        if (!ordered.error) {
          const clearItem = await clearCart(tableSession);
+
+         const order = await getMyLatestOrder(tableSession);
+         const orders = (await getOrCacheOrders(userSession));
+
+         if (!orders.error) {
+            orders.data.push(order);
+            io.emit("orders sent", orders);
+         }
          
          if (clearItem) {
             console.log("cart cleared!");
@@ -66,4 +75,12 @@ export default function(socket: Socket) {
          }
        }
     });
+
+    if (tableSession) await updateLatestOrder(socket, tableSession);
+    if (userSession) {
+        const orders = (await getOrCacheOrders(userSession));
+        if (orders.error) return socket.emit("error", orders);
+        
+        io.emit("orders sent", orders);
+    }
 };
