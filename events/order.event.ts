@@ -5,6 +5,8 @@ import { redisGet, redisSet } from "../lib/redis";
 import io from "../lib/socket.io";
 import updateOrderStatus from "../api/updateOrderStatus";
 import getMyStatus from "../api/getMyStatus";
+import getCartItem from "../utils/getCartItem";
+import order from "../api/order";
 
 
 export default function(socket: Socket) {
@@ -51,7 +53,13 @@ export default function(socket: Socket) {
         socket.emit("latest order update", {status: order.status, data: response})
     });
 
-    socket.on("order cart item", () => {
+    socket.on("checkout cart", async ( { paymentMethod }: {paymentMethod: "ONLINE" | "CASH"}) => {
+        const cartItems = await getCartItem(tableSession);
 
+       const ordered = await order(tableSession,{items: cartItems, paymentMethod});
+       
+       if (!ordered.error) {
+         
+       }
     });
 };
