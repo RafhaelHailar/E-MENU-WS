@@ -43,7 +43,6 @@ export default async function(socket: Socket) {
                 inventory[inventoryIdx] = { id: productId, quantity: inventory[inventoryIdx].quantity - current.quantity };
             }
             await redisSet("inventory", inventory);
-            console.log(inventory);
         }
         
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
