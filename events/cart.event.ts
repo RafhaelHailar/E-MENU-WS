@@ -25,7 +25,7 @@ export default async function(socket: Socket) {
 
         const inventoryNewQuantity = inventory.quantity - (cartItemQuantity.data || 1);
 
-        if (inventoryNewQuantity) return socket.emit("error cart action", { status: 400, message: "product doesn't have enough quantity" });
+        if (inventoryNewQuantity <= 0) return socket.emit("error cart action", { status: 400, message: "product doesn't have enough quantity" });
         
         if (!cartItemQuantity.data) 
             await redisSet(key, 1);
