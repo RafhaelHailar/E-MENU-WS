@@ -34,16 +34,16 @@ async function shutdown() {
 }
 
 process.on("exit", async() => {
-    await shutdown();
     console.log("app exited");
+    await shutdown();
 });
 
 process.on('uncaughtException', async (e) => {
-    await shutdown();
     console.log(`Uncaught Exception: ${e}`);
+    await shutdown();
 });
 
 process.on('unhandledRejection', async (e) => {
-    await shutdown();
     console.log(`Unhandled Rejection: ${e}`);
+    await shutdown();
 });
