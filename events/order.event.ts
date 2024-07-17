@@ -31,6 +31,18 @@ export default async function(socket: Socket) {
         const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
         orders.data[orderIdx] = order;
+
+        const inventory = (await getOrCacheInventory(userSession)).data;
+        if (!orders.error) {
+            for (let i = 0;i < order.orders.length;i++) {
+                const current = order.orders[i];
+                const productId = current.product.id;
+                const inventoryIdx = inventory.indexOf(inventory.find(item => item.id === productId));
+
+                inventory[inventoryIdx] = { id: productId, quantity: inventory[inventoryIdx].quantity - current.quantity };
+            }
+            await redisSet("inventory", inventory);
+        }
         
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
         
@@ -63,19 +75,9 @@ export default async function(socket: Socket) {
 
          const order = (await getMyLatestOrder(tableSession)).data;
          const orders = (await getOrCacheOrders(userSession));
-         const inventory = (await getOrCacheInventory(userSession)).data;
 
          if (!orders.error) {
             orders.data.push(order);
-
-            for (let i = 0;i < order.orders.length;i++) {
-                const current = order.orders[i];
-                const productId = current.product.id;
-                const inventoryIdx = inventory.indexOf(inventory.find(item => item.id === productId));
-
-                inventory[inventoryIdx] = { id: productId, quantity: inventory[inventoryIdx].quantity - current.quantity };
-            }
-
             io.emit("orders sent", orders); 
             await redisSet("orders", orders);
          }  else console.log(orders.error);
