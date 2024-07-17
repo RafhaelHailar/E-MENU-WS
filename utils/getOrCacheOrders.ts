@@ -8,8 +8,8 @@ async function getOrCacheOrders(userSession: string) {
     if (orders.error || orders.data != null) return orders;
     
     const ordersData = await getOrders(userSession);
-    redisSet(key, ordersData);
-    return { data: ordersData };
+    redisSet(key, ordersData.data);
+    return { ...ordersData };
 }
 
 export default getOrCacheOrders;
