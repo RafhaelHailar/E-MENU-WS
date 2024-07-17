@@ -47,7 +47,7 @@ export default async function(socket: Socket) {
     socket.on("my latest order status", async () => {
         const tableStatus = await getMyStatus(tableSession);
 
-        if (tableStatus.status !== 200) return socket.emit("error", tableStatus);
+        if (tableStatus.status !== 200) return socket.emit("non displayable error", tableStatus);
 
         await updateLatestOrder(socket, tableSession);
     });
