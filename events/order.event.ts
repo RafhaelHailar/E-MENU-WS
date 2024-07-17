@@ -7,6 +7,9 @@ import updateOrderStatus from "../api/updateOrderStatus";
 import getMyStatus from "../api/getMyStatus";
 import getCartItem from "../utils/getCartItem";
 import order from "../api/order";
+import clearCart from "../utils/clearCartItem";
+import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
+import updateLatestOrder from "../utils/updateLatestOrder";
 
 
 export default function(socket: Socket) {
@@ -45,12 +48,7 @@ export default function(socket: Socket) {
 
         if (tableStatus.status !== 200) return socket.emit("error", tableStatus);
 
-        const order = await getMyLatestOrder(tableSession);
-        if (order.error) return socket.emit("error", order.error);
-        
-        const response = order.data || [];
-
-        socket.emit("latest order update", {status: order.status, data: response})
+        await updateLatestOrder(socket, tableSession);
     });
 
     socket.on("checkout cart", async ( { paymentMethod }: {paymentMethod: "ONLINE" | "CASH"}) => {
@@ -59,7 +57,13 @@ export default function(socket: Socket) {
        const ordered = await order(tableSession,{items: cartItems, paymentMethod});
        
        if (!ordered.error) {
+         const clearItem = await clearCart(tableSession);
          
+         if (clearItem) {
+            console.log("cart cleared!");
+            await updateLatestOrder(socket, tableSession);
+            await sendCartItemsUpdate(socket, tableSession);
+         }
        }
     });
 };
