@@ -10,6 +10,7 @@ import order from "../api/order";
 import clearCart from "../utils/clearCartItem";
 import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
 import updateLatestOrder from "../utils/updateLatestOrder";
+import getOrCacheInventory from "../utils/getOrCacheInventor";
 
 
 export default async function(socket: Socket) {
@@ -30,6 +31,19 @@ export default async function(socket: Socket) {
         const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
         orders.data[orderIdx] = order;
+
+        const inventory = (await getOrCacheInventory(userSession)).data;
+
+        if (data.status === "SERVED") {
+            for (let i = 0;i < order.orders.length;i++) {
+                const current = order.orders[i];
+                const productId = current.product.id;
+                const inventoryIdx = inventory.indexOf(inventory.find(item => item.id === productId));
+
+                inventory[inventoryIdx] = { id: productId, quantity: inventory[inventoryIdx].quantity - current.quantity };
+            }
+            await redisSet("inventory", inventory);
+        }
         
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
         
@@ -60,19 +74,19 @@ export default async function(socket: Socket) {
        if (!ordered.error) {
          const clearItem = await clearCart(tableSession);
 
-         const order = await getMyLatestOrder(tableSession);
+         const order = (await getMyLatestOrder(tableSession)).data;
          const orders = (await getOrCacheOrders(userSession));
 
          if (!orders.error) {
             orders.data.push(order);
-            io.emit("orders sent", orders);
-         }
-         
-         if (clearItem) {
+            io.emit("orders sent", orders); 
+            await redisSet("orders", orders);
+         }  else console.log(orders.error);
+
+          if (clearItem) 
             console.log("cart cleared!");
-            await updateLatestOrder(socket, tableSession);
-            await sendCartItemsUpdate(socket, tableSession);
-         }
+          await updateLatestOrder(socket, tableSession);
+          await sendCartItemsUpdate(socket, tableSession);
        }
     });
 
