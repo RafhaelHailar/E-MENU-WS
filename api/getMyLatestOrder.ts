@@ -7,6 +7,8 @@ async function getMyLatestOrder(tableSession: string) {
             "Cookie": `_table_session=${tableSession}`
         },
     });
+
+    return request;
 }
 
 export default asyncHandler(getMyLatestOrder);
