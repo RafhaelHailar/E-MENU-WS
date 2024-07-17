@@ -17,28 +17,29 @@ export default function(socket: Socket) {
 
     socket.on("get orders", async () => {
         const orders = await getOrCacheOrders(userSession);
-        socket.emit("orders sent", orders);
+
+        if (!orders.error)
+            socket.emit("orders sent", orders);
     });
 
     socket.on("update order status", async (data) => {
         const orders = (await getOrCacheOrders(userSession));
-
         if (orders.error) return socket.emit("error", orders);
-
+        
         const order = orders.data.find(order => order.orderNo === data.orderNo);
         const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
-        orders[orderIdx] = order;
-
+        orders.data[orderIdx] = order;
+        
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
-
-        if (!customerSocketId.error) {
+        
+        if (!customerSocketId.error && customerSocketId.data) {
             const customerSocket = io.sockets.sockets.get(customerSocketId.data);
             console.log("sending update....");
             customerSocket.emit("latest order update", {status: 200, data: order});
         }
-        
-        redisSet("orders", orders);
+   
+        redisSet("orders", orders.data);
         io.emit("orders sent", orders);
         await updateOrderStatus(userSession, data.orderNo, data.status);
     });
