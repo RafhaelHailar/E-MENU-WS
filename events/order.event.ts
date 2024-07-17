@@ -12,7 +12,7 @@ import sendCartItemsUpdate from "../utils/sendCartItemsUpdate";
 import updateLatestOrder from "../utils/updateLatestOrder";
 
 
-export default function(socket: Socket) {
+export default async function(socket: Socket) {
     const { userSession, tableSession } = socket.handshake.query as  { userSession: string, tableSession: string }; 
 
     socket.on("get orders", async () => {
@@ -59,6 +59,14 @@ export default function(socket: Socket) {
        
        if (!ordered.error) {
          const clearItem = await clearCart(tableSession);
+
+         const order = await getMyLatestOrder(tableSession);
+         const orders = (await getOrCacheOrders(userSession));
+
+         if (!orders.error) {
+            orders.data.push(order);
+            io.emit("orders sent", orders);
+         }
          
          if (clearItem) {
             console.log("cart cleared!");
@@ -67,4 +75,12 @@ export default function(socket: Socket) {
          }
        }
     });
+
+    if (tableSession) await updateLatestOrder(socket, tableSession);
+    if (userSession) {
+        const orders = (await getOrCacheOrders(userSession));
+        if (orders.error) return socket.emit("error", orders);
+        
+        io.emit("orders sent", orders);
+    }
 };
