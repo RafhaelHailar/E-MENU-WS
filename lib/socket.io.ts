@@ -7,7 +7,7 @@ import cartEvent from "../events/cart.event";
 
 const io = new Server({
     cors: {
-       origin: 'http://localhost:3000'
+       origin: [process.env.LOCALHOST_URL, process.env.FRONTEND_BASE_URL]
     }
 });
 
