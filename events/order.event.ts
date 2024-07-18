@@ -80,7 +80,7 @@ export default async function(socket: Socket) {
          if (!orders.error) {
             orders.data.push(order);
             io.emit("orders sent", orders); 
-            await redisSet("orders", orders);
+            await redisSet("orders", orders.data);
          }  else console.log(orders.error);
 
           if (clearItem) 
