@@ -24,9 +24,9 @@ export function getSocket() {
         
         if (userSession) await redisSet(`user-session-${userSession}`, socket.id);
         if (tableSession && tableNo) {
-            await redisHUpsert(`table-session:${tableSession}`, {
+            await redisHUpsert(`table-session:${tableSession}`, {   
                 create: {
-                    sessionId: tableSession,
+                    session: tableSession,
                     createdAt: Date.now(),
                     tableNo,
                     socketId: socket.id,
