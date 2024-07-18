@@ -26,6 +26,7 @@ export function getSocket() {
         if (tableSession && tableNo) {
             await redisHUpsert(`table-session:${tableSession}`, {
                 create: {
+                    sessionId: tableSession,
                     createdAt: Date.now(),
                     tableNo,
                     socketId: socket.id,
