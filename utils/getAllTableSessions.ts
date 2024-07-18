@@ -8,8 +8,8 @@ async function getAllTableSessions() {
 
     for (let i = 0;i < tableSessionKeys.length;i++) {
         const key = tableSessionKeys[i];
-        const {createdAt, socketId, status, tableNo } = (await redisHGetAll(key)).data;
-        tableSessions.push({createdAt: (new Date(Number(createdAt))), socketId, status: Boolean(Number(status)), tableNo });
+        const {session, createdAt, socketId, status, tableNo } = (await redisHGetAll(key)).data;
+        tableSessions.push({session, createdAt: (new Date(Number(createdAt))), socketId, status: Boolean(Number(status)), tableNo });
     }
     
     return tableSessions;
