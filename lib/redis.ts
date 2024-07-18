@@ -1,5 +1,5 @@
 import { Redis } from "ioredis";
-import sendTableQueues from "utils/sendTableQueues";
+import sendTableQueues from "../utils/sendTableQueues";
 
 const redis = globalThis.redis || new Redis(`rediss://default:${process.env.REDIS_DB_PASSWORD}@${process.env.REDIS_DB_HOST}:${process.env.REDIS_DB_PORT}`);
 
