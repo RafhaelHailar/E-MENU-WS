@@ -1,4 +1,5 @@
 import { Redis } from "ioredis";
+import sendTableQueues from "utils/sendTableQueues";
 
 const redis = globalThis.redis || new Redis(`rediss://default:${process.env.REDIS_DB_PASSWORD}@${process.env.REDIS_DB_HOST}:${process.env.REDIS_DB_PORT}`);
 
@@ -69,6 +70,7 @@ export const redisHUpsert = requestHandler(async function(key: string, option: {
     const create = option.create;
 
     await redisHSet(key, create);
+    await sendTableQueues();
 
     return { data: "created" };
 });
