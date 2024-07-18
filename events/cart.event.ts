@@ -14,7 +14,7 @@ export default async function(socket: Socket) {
         const tableStatus = await getMyStatus(tableSession);
         const inventory = await getProductInventoryById(userSession, productId);
 
-        if (tableStatus.error) return socket.emit("error cart action", tableStatus);
+        if (tableStatus.error) return socket.emit("error cart action", {status: tableStatus.status, message: tableStatus.error.message});   
         if (!tableStatus.data.status) return socket.emit("error cart action", { message: "you are not allowed to order", status: 401 });
 
         const key = `${tableSession}-cart:${productId}`;
@@ -39,7 +39,7 @@ export default async function(socket: Socket) {
         const productId = data.productId;
         const tableStatus = await getMyStatus(tableSession);
 
-        if (tableStatus.error) return socket.emit("error cart action", tableStatus);
+        if (tableStatus.error) return socket.emit("error cart action", {status: tableStatus.status, message: tableStatus.error.message});
 
         const key = `${tableSession}-cart:${productId}`;
 

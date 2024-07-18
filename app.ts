@@ -5,6 +5,7 @@ import login from "./api/login";
 import redis, { redisSet } from "./lib/redis";
 import io, { getSocket }  from "./lib/socket.io";
 import getOrCacheInventory from "./utils/getOrCacheInventor";
+import getOrCacheTableSessions from "utils/getOrCacheTableSessions";
 
 import("node-fetch");
 
@@ -19,6 +20,7 @@ async function init() {
     const sessionId = session.data.sessionId;
     await getOrCacheOrders(sessionId);
     await getOrCacheInventory(sessionId);
+    await getOrCacheTableSessions(sessionId);
 
     redisSet("_user_session", sessionId);
 }
