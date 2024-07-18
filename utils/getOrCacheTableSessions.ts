@@ -1,5 +1,5 @@
 import { redisGet, redisSet } from "../lib/redis";
-import getTableSessions from "api/getTableSessions";
+import getTableSessions from "../api/getTableSessions";
 
 async function getOrCacheTableSessions(userSession: string) {
     const key = "table_session";
