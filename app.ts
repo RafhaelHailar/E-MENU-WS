@@ -5,7 +5,7 @@ import login from "./api/login";
 import redis, { redisSet } from "./lib/redis";
 import io, { getSocket }  from "./lib/socket.io";
 import getOrCacheInventory from "./utils/getOrCacheInventor";
-import getOrCacheTableSessions from "utils/getOrCacheTableSessions";
+import getOrCacheTableSessions from "./utils/getOrCacheTableSessions";
 
 import("node-fetch");
 
