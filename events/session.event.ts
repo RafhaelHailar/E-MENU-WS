@@ -1,13 +1,18 @@
 import { Socket } from "socket.io";
-import getOrCacheTableSessions from "utils/getOrCacheTableSessions";
+import getAllTableSessions from "../utils/getAllTableSessions";
 
-export default function(socket: Socket) {
+export default async function(socket: Socket) {
     const { userSession } = socket.handshake.query as  { userSession: string }; 
-    
-    socket.on("get table sessions", async () => {
-        const tableSessions = await getOrCacheTableSessions(userSession);
 
-        if (!tableSessions.error)
-            socket.emit("table sessions sent", tableSessions);
-    })
+    socket.on("get table queues", async () => {
+        console.log("hello from client")
+        const tableSessions = await getAllTableSessions();
+        console.log(tableSessions);
+        socket.emit("table queues sent", tableSessions);
+    });
+
+    if (userSession) {
+        const tableSessions = await getAllTableSessions();
+        socket.emit("table queues sent", {data: tableSessions});
+    }
 }
