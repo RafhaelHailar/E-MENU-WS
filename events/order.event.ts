@@ -31,10 +31,9 @@ export default async function(socket: Socket) {
         const orderIdx = orders.data.indexOf(order);
         order.status = data.status;
         orders.data[orderIdx] = order;
-
-        const inventory = (await getOrCacheInventory(userSession)).data;
-
+        
         if (data.status === "SERVED") {
+            const inventory = (await getOrCacheInventory(userSession)).data;
             for (let i = 0;i < order.orders.length;i++) {
                 const current = order.orders[i];
                 const productId = current.product.id;
@@ -46,7 +45,6 @@ export default async function(socket: Socket) {
         }
         
         const customerSocketId = await redisGet(`table-session-${order.sessionId}`);
-        
         if (!customerSocketId.error && customerSocketId.data) {
             const customerSocket = io.sockets.sockets.get(customerSocketId.data);
             console.log("sending update....");
@@ -55,7 +53,7 @@ export default async function(socket: Socket) {
    
         redisSet("orders", orders.data);
         io.emit("orders sent", orders);
-        await updateOrderStatus(userSession, data.orderNo, data.status);
+        const response = await updateOrderStatus(userSession, data.orderNo, data.status);
     });
 
     socket.on("my latest order status", async () => {
