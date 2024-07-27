@@ -24,7 +24,7 @@ export function getSocket() {
         if (!userSession && !tableSession) return socket.disconnect(true);
         
         if (userSession) await redisSet(`user-session-${userSession}`, socket.id);
-        if (tableSession && tableNo) await redisSet(`customer-session-${tableSession}`);
+        if (tableSession && tableNo) await redisSet(`table-session-${tableSession}`, socket.id);
 
         connectionEvent(socket);
         orderEvent(socket);
